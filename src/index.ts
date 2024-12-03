@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { connectDB } from './config/database';
 dotenv.config();
 
 
@@ -9,6 +10,8 @@ const port = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
+
+connectDB();
 
 
 app.get('/', (req: Request, res: Response) => {
