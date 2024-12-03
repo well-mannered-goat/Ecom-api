@@ -1,0 +1,30 @@
+{
+  "name": "ecom-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev":"nodemon src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.6",
+    "nodemon": "^3.1.7",
+    "pg": "^8.13.1",
+    "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.10",
+    "@types/sequelize": "^4.28.20",
+    "express": "^4.21.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
