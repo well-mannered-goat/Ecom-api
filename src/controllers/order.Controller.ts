@@ -47,11 +47,76 @@ export const bookOrder = async (req: Request, res: Response) => {
                 status: order.status,
             },
         });
+
+        product.stock_quantity = product.stock_quantity - 1;
+        product.save();
     } catch (err) {
         console.error("Error creating the order:", err);
         res.status(500).json({ message: "Error saving the order" });
     }
 };
+
+export const successOrder = async (req: Request, res: Response) => {
+    const { orderID } = req.body;
+
+    try {
+        const order = await Order.findOne({
+            where: {
+                orderID
+            }
+        })
+
+        if (!order) {
+            res.status(404).json({ message: "Order not found" });
+            return;
+        }
+
+        order.status = "Completed";
+        order.save();
+        res.status(200).json({ message: "Order completed successfully" });
+    }
+    catch (err) {
+        console.error("Error in successful order", err);
+        res.status(500).json({ message: "Order was not successful" });
+    }
+}
+
+export const failedOrder = async (req: Request, res: Response) => {
+    const { orderID } = req.body;
+
+    try {
+        const order = await Order.findOne({
+            where: {
+                orderID
+            }
+        })
+
+        if (!order) {
+            res.status(404).json({ message: "Order not found" });
+            return;
+        }
+
+        order.status = "Failed";
+        await order.save();
+
+        const product = await Product.findOne({
+            where: {
+                id: order.product_id,
+            }
+        })
+
+        if (product) {
+            product.stock_quantity = product.stock_quantity + 1;
+        }
+
+        res.status(200).json({ message: "Order marked as failed" });
+    }
+    catch (err) {
+        console.error("Error in failing order", err);
+        res.status(500).json({ message: "Failed to mark order as failed" });
+    }
+}
+
 
 export const updateOrder = async (req: Request, res: Response) => {
     const { orderID, new_quantity, new_productID, new_publicID } = req.body;
