@@ -49,11 +49,20 @@ User.init(
         modelName: "User",
         tableName: "User",
         hooks: {
-            beforeCreate: async (user) => {
+            afterCreate: async (user) => {
                 user.publicID = await bcrypt.hash(user.id.toString(), 10);
+                await user.save();
             },
         },
     }
 )
+
+// sequelize.sync()
+//   .then(() => {
+//     console.log('Database synchronized!');
+//   })
+//   .catch((error) => {
+//     console.error('Error synchronizing database:', error);
+//   });
 
 export default User;

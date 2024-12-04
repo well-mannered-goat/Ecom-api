@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { connectDB } from './config/database';
 dotenv.config();
+
+import { connectDB } from './config/database';
+import userRoutes from "./routes/userRoutes"
+
 
 
 const app = express();
@@ -12,6 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 connectDB();
+
+app.use('/user',userRoutes);
 
 
 app.get('/', (req: Request, res: Response) => {
