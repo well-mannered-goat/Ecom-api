@@ -29,6 +29,7 @@ app.use('/order',orderRoutes);
 
 
 app.get('/', (req: Request, res: Response) => {
+  console.log("Pinged");
   res.send('Ecommerce API');
 });
 
