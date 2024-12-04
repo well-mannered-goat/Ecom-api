@@ -24,61 +24,62 @@ const createUser = async (req: Request, res: Response) => {
     }
 }
 
-const getUserByEmailOrPhone = async (req: Request, res: Response) => {
-    const { email , phone_number } = req.query;
+const getUser = async (req: Request, res: Response) => {
+    const { publicID } = req.query;
 
-    if (email) {
+    if (publicID && typeof publicID === "string") {
         try {
             const user = await User.findOne({
                 where: {
-                    email: email as string
+                    publicID
                 },
-                attributes: ["name", "email", "phone_number"]
+                attributes: ["publicID", "name", "email", "phone_number"]
             })
 
-            res.status(200).json(user)
+            if (user) {
+                res.status(200).json(user)
+                return
+            }
+
+            res.status(404).json({ message: "User not found" })
+            return
         }
         catch (err) {
-            console.error("Error finding user by email", err)
+            console.error("Error finding user", err);
             res.status(500).json({ message: "Error finding user" })
-        }
-    }
-
-    if (phone_number) {
-
-        const phone= Number(phone_number);
-
-        if (isNaN(phone)) {
-            res.status(400).json({ message: "Invalid phone number" });
             return
         }
 
-        try {
-            const user = await User.findOne({
-                where: {
-                    phone_number: phone
-                },
-                attributes: ["name", "email", "phone_number"]
-            })
-
-            res.status(200).json(user)
-        }
-        catch (err) {
-            console.error("Error finding user by phone number", err)
-            res.status(500).json({ message: "Error finding user" })
-        }
     }
 
     res.status(400).json({ message: "Invalid query parameters" });
 }
 
 const updateTask = async (req: Request, res: Response) => {
-    const { name, email, phone_number }=req.body;
+    const { publicID, new_email, new_phone_number, new_name } = req.body;
 
-    const user = await User.findOne({
-        where:{
-            email:email as string,
-            phone_number:phone_number as number
+    if (publicID && typeof publicID === "string") {
+        try {
+            const user = await User.findOne({
+                where: {
+                    publicID
+                }
+            })
+
+            if (user) {
+                user.name = new_name === undefined ? user.name : new_name;
+                user.email = new_email === undefined ? user.email : new_email;
+                user.phone_number = new_phone_number === undefined ? user.phone_number : new_phone_number;
+            }
+
+            res.status(200).json({ message: "Successfully updated", user })
+            return
         }
-    })
+        catch (err) {
+            console.error("Error finding user", err);
+            res.status(500).json({ message: "Error finding user" })
+            return
+        }
+    }
+    res.status(400).json({ message: "Invalid query parameters" });
 }
