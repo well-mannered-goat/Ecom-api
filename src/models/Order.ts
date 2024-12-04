@@ -9,7 +9,7 @@ interface OrderAttributes {
     product_id: number;
     order_date: Date;
     quantity: number;
-    status:"Cancelled"|"Booked"|"Completed";
+    status:"Cancelled"|"Booked"|"Completed"|"Failed";
     orderID:string,
 }
 
@@ -21,7 +21,7 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public product_id!: number;
     public order_date!: Date;
     public quantity!: number;
-    public status!:"Cancelled"|"Booked"|"Completed";
+    public status!:"Cancelled"|"Booked"|"Completed"|"Failed";
     public orderID!:string;
 
     public user?:User;
@@ -61,7 +61,7 @@ Order.init(
             allowNull: false,
         },
         status:{
-            type:DataTypes.ENUM("Cancelled","Booked","Completed"),
+            type:DataTypes.ENUM("Cancelled","Booked","Completed","Failed"),
             allowNull:false,
         },
         orderID:{
