@@ -1,46 +1,58 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../config/database";
+import bcrypt from "bcrypt"
 
-interface UserAtrributes{
-    id:number,
-    name:string,
-    email:string,
-    phone_number:number,
+interface UserAtrributes {
+    id: number,
+    publicID: string,
+    name: string,
+    email: string,
+    phone_number: number,
 }
 
-interface UserCreationAtrributes extends Optional<UserAtrributes, "id">{};
+interface UserCreationAtrributes extends Optional<UserAtrributes, "id" | "publicID"> { };
 
-class User extends Model<UserAtrributes, UserCreationAtrributes> implements UserAtrributes{
-    public id!:number;
-    public name!:string;
-    public email!:string;
-    public phone_number!:number;
+class User extends Model<UserAtrributes, UserCreationAtrributes> implements UserAtrributes {
+    public id!: number;
+    public publicID!: string;
+    public name!: string;
+    public email!: string;
+    public phone_number!: number;
 }
 
 User.init(
     {
-        id:{
-            type:DataTypes.INTEGER.UNSIGNED,
-            autoIncrement:true,
-            primaryKey:true,
+        id: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            autoIncrement: true,
+            primaryKey: true,
         },
-        name:{
-            type:DataTypes.STRING,
-            allowNull:false,
+        publicID: {
+            type: DataTypes.STRING,
+            unique: true,
         },
-        email:{
-            type:DataTypes.STRING,
-            allowNull:false,
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-        phone_number:{
-            type:DataTypes.INTEGER.UNSIGNED,
-            allowNull:false,
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        phone_number: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: false,
         },
     },
     {
         sequelize,
-        modelName:"User",
-        tableName:"User"
+        modelName: "User",
+        tableName: "User",
+        hooks: {
+            beforeCreate: async (user) => {
+                user.publicID = await bcrypt.hash(user.id.toString(), 10);
+            },
+        },
     }
 )
 
