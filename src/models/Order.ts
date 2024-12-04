@@ -9,9 +9,11 @@ interface OrderAttributes {
     product_id: number;
     order_date: Date;
     quantity: number;
+    status:"Cancelled"|"Booked"|"Completed";
+    orderID:string,
 }
 
-interface OrderCreationAttributes extends Optional<OrderAttributes, "id"> { }
+interface OrderCreationAttributes extends Optional<OrderAttributes, "id"|"orderID"> { }
 
 class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
     public id!: number;
@@ -19,6 +21,8 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public product_id!: number;
     public order_date!: Date;
     public quantity!: number;
+    public status!:"Cancelled"|"Booked"|"Completed";
+    public orderID!:string;
 }
 
 Order.init(
@@ -53,6 +57,14 @@ Order.init(
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
         },
+        status:{
+            type:DataTypes.ENUM("Cancelled","Booked","Completed"),
+            allowNull:false,
+        },
+        orderID:{
+            type:DataTypes.INTEGER.UNSIGNED,
+            unique:true,
+        }
     },
     {
         sequelize,
