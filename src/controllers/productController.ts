@@ -4,8 +4,8 @@ import Product from "../models/Product";
 export const createProduct = async (req: Request, res: Response) => {
     const { name, category, price, stock_quantity } = req.body;
 
-    if (!name || !category || !price || !stock_quantity) {
-        res.status(400).json({ message: "Invalid Request Body" });
+    if (!name || !category || !price || !stock_quantity || isNaN(stock_quantity) || stock_quantity < 0) {
+        res.status(400).json({ message: "Invalid Request Body: stock_quantity should be a positive number" });
         return;
     }
 

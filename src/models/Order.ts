@@ -3,17 +3,19 @@ import { sequelize } from "../config/database";
 import User from "./User";
 import Product from "./Product";
 
+import bcrypt from "bcrypt";
+
 interface OrderAttributes {
     id: number;
     user_id: number;
     product_id: number;
     order_date: Date;
     quantity: number;
-    status:"Cancelled"|"Booked"|"Completed"|"Failed";
-    orderID:string,
+    status: "Cancelled" | "Booked" | "Completed" | "Failed";
+    orderID: string,
 }
 
-interface OrderCreationAttributes extends Optional<OrderAttributes, "id"|"orderID"> { }
+interface OrderCreationAttributes extends Optional<OrderAttributes, "id" | "orderID"> { }
 
 class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
     public id!: number;
@@ -21,11 +23,11 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public product_id!: number;
     public order_date!: Date;
     public quantity!: number;
-    public status!:"Cancelled"|"Booked"|"Completed"|"Failed";
-    public orderID!:string;
+    public status!: "Cancelled" | "Booked" | "Completed" | "Failed";
+    public orderID!: string;
 
-    public user?:User;
-    public product?:Product
+    public user?: User;
+    public product?: Product
 }
 
 Order.init(
@@ -60,19 +62,25 @@ Order.init(
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
         },
-        status:{
-            type:DataTypes.ENUM("Cancelled","Booked","Completed","Failed"),
-            allowNull:false,
+        status: {
+            type: DataTypes.ENUM("Cancelled", "Booked", "Completed", "Failed"),
+            allowNull: false,
         },
-        orderID:{
-            type:DataTypes.INTEGER.UNSIGNED,
-            unique:true,
+        orderID: {
+            type: DataTypes.STRING,
+            unique: true,
         }
     },
     {
         sequelize,
         modelName: "Order",
         tableName: "Order",
+        hooks: {
+            afterCreate: async (order) => {
+                order.orderID = await bcrypt.hash(order.id.toString(), 10);
+                await order.save();
+            },
+        },
     }
 );
 

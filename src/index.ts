@@ -6,6 +6,7 @@ dotenv.config();
 import { connectDB, sequelize } from './config/database';
 import userRoutes from "./routes/userRoutes";
 import productRoutes from "./routes/productRoutes";
+import orderRoutes from "./routes/orderRoutes";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -24,6 +25,7 @@ sequelize.sync()
 
 app.use('/user',userRoutes);
 app.use('/product',productRoutes);
+app.use('/order',orderRoutes);
 
 
 app.get('/', (req: Request, res: Response) => {

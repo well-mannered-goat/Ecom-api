@@ -79,32 +79,33 @@ export const updateUser = async (req: Request, res: Response) => {
                 where: {
                     publicID
                 }
-            })
+            });
 
             if (user) {
-                user.name = new_name === undefined ? user.name : new_name;
-                user.email = new_email === undefined ? user.email : new_email;
-                user.phone_number = new_phone_number === undefined ? user.phone_number : new_phone_number;
+                if (new_name !== undefined) user.name = new_name;
+                if (new_email !== undefined) user.email = new_email;
+                if (new_phone_number !== undefined) user.phone_number = new_phone_number;
+
+                await user.save();
 
                 res.status(200).json({
                     message: "Successfully updated",
                     User: {
-                        publicID: user?.publicID,
-                        name: user?.name,
-                        email: user?.email,
-                        phone_number: user?.phone_number
+                        publicID: user.publicID,
+                        name: user.name,
+                        email: user.email,
+                        phone_number: user.phone_number
                     }
-                })
-                return
+                });
+                return;
             }
 
-            res.status(404).json({ message: "User not found" })
+            res.status(404).json({ message: "User not found" });
+        } catch (err) {
+            console.error("Error updating user", err);
+            res.status(500).json({ message: "Error updating user" });
         }
-        catch (err) {
-            console.error("Error finding user", err);
-            res.status(500).json({ message: "Error finding user" })
-            return
-        }
+    } else {
+        res.status(400).json({ message: "Invalid query parameters" });
     }
-    res.status(400).json({ message: "Invalid query parameters" });
-}
+};

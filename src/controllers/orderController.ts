@@ -6,13 +6,17 @@ import Product from "../models/Product";
 export const bookOrder = async (req: Request, res: Response) => {
     const { publicID, productID, quantity } = req.body;
 
-    if (!publicID || !productID || !quantity) {
+    if (!publicID || !productID || !quantity || quantity <= 0) {
         res.status(400).json({ message: "Invalid Request Body" });
         return;
     }
 
     try {
-        const user = await User.findByPk(publicID);
+        const user = await User.findOne({
+            where: {
+                publicID
+            }
+        });
         if (!user) {
             res.status(404).json({ message: "User not found" });
             return;
@@ -25,6 +29,11 @@ export const bookOrder = async (req: Request, res: Response) => {
         });
         if (!product) {
             res.status(404).json({ message: "Product not found" });
+            return;
+        }
+
+        if (product.stock_quantity < quantity) {
+            res.status(400).json({ message: "Not enough stock available" });
             return;
         }
 
@@ -48,8 +57,8 @@ export const bookOrder = async (req: Request, res: Response) => {
             },
         });
 
-        product.stock_quantity = product.stock_quantity - 1;
-        product.save();
+        product.stock_quantity -= quantity;
+        await product.save();
     } catch (err) {
         console.error("Error creating the order:", err);
         res.status(500).json({ message: "Error saving the order" });
@@ -99,11 +108,11 @@ export const failedOrder = async (req: Request, res: Response) => {
         order.status = "Failed";
         await order.save();
 
-        const product = await Product.findOne({
-            where: {
-                id: order.product_id,
-            }
-        })
+        const product = await Product.findOne({ where: { id: order.product_id } });
+        if (product) {
+            product.stock_quantity += order.quantity;
+            await product.save();
+        }
 
         if (product) {
             product.stock_quantity = product.stock_quantity + 1;
@@ -121,8 +130,8 @@ export const failedOrder = async (req: Request, res: Response) => {
 export const updateOrder = async (req: Request, res: Response) => {
     const { orderID, new_quantity, new_productID, new_publicID } = req.body;
 
-    if (!orderID) {
-        res.status(400).json({ message: "Order ID is required" });
+    if (!orderID || (new_quantity && new_quantity <= 0)) {
+        res.status(400).json({ message: "Invalid input for quantity or order ID" });
         return;
     }
 
@@ -201,9 +210,15 @@ export const cancelOrder = async (req: Request, res: Response) => {
         })
 
         if (order) {
-            order.status = "Cancelled",
+            order.status = "Cancelled";
 
-                order.save()
+            order.save()
+
+            const product = await Product.findOne({ where: { id: order.product_id } });
+            if (product) {
+                product.stock_quantity += order.quantity;
+                await product.save();
+            }
 
             res.status(200).json({ message: "Order successfully cancelled" })
             return
