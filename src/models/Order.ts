@@ -23,6 +23,9 @@ class Order extends Model<OrderAttributes, OrderCreationAttributes> implements O
     public quantity!: number;
     public status!:"Cancelled"|"Booked"|"Completed";
     public orderID!:string;
+
+    public user?:User;
+    public product?:Product
 }
 
 Order.init(
